@@ -1,3 +1,4 @@
 #define Immersive_VERSION_MAJOR @Immersive_VERSION_MAJOR@
 #define Immersive_VERSION_MINOR @Immersive_VERSION_MINOR@
 #cmakedefine AS_EXECUTABLE
+#cmakedefine FOR_ANDROID

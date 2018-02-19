@@ -12,10 +12,14 @@ set(PROJECT_BINARY_DIR build/native)
 
 configure_file(
 	"${PROJECT_SOURCE_DIR}/immersive_config.h.in"
-	"${PROJECT_BINARY_DIR}/immersive_config.h"
+	"${IMMERSIVE_ROOT}/build/${TGT_ABI}/include/immersive_config.h"
 )
 
-include_directories("${PROJECT_BINARY_DIR}")
+set(CMAKE_LIBRARY_PATH "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib")
+
+include_directories("${IMMERSIVE_ROOT}/build/${TGT_ABI}/include")
+
+#include_directories("${PROJECT_BINARY_DIR}")
 
 if(AS_EXECUTABLE)
     add_executable(immersive src/immersive.c)

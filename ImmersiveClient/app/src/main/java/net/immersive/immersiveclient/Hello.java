@@ -6,7 +6,7 @@ package net.immersive.immersiveclient;
 
 public class Hello {
     static {
-        System.loadLibrary("hello");
+        System.loadLibrary("immersive");
     }
 
     @SuppressWarnings("unused")
@@ -16,4 +16,5 @@ public class Hello {
 
     public native int addInts(int a, int b);
     public native int mulInts(int a, int b);
+    public native String helloStr();
 }

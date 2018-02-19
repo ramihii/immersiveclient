@@ -21,7 +21,7 @@ android {
     }
     sourceSets {
         main {
-            jniLibs.srcDirs 'hello-lib/bin'
+            jniLibs.srcDirs 'immersive-lib/bin'
         }
     }
     buildTypes {

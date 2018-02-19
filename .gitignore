@@ -30,3 +30,6 @@ tags
 
 # old autotools files, switched to CMake
 /.autotools-backup.tar.gz
+
+# compiled README.md
+/README.html

@@ -1,8 +1,10 @@
-#ifdef ANDROID
+#include <immersive_config.h>
+
+#ifdef FOR_ANDROID
 #include <jni.h>
 #endif
 
-#include <immersive_config.h>
+#include <zabar.h>
 
 #include <stdio.h>
 
@@ -10,7 +12,7 @@
 extern "C" {
 #endif
 
-#ifdef ANDROID
+#ifdef FOR_ANDROID
 JNIEXPORT jint JNICALL
 Java_net_immersive_immersiveclient_Hello_addInts(JNIEnv *env, jobject obj, jint a, jint b) {
 	return a + b;
@@ -20,6 +22,12 @@ JNIEXPORT jint JNICALL
 Java_net_immersive_immersiveclient_Hello_mulInts(JNIEnv *env, jobject obj, jint a, jint b) {
 	return a * b;
 }
+
+JNIEXPORT jstring JNICALL Java_net_immersive_immersiveclient_Hello_helloStr(JNIEnv *env, jobject obj) {
+	char *str = "Hello, world_imm\n";
+	return (*env)->NewStringUTF(env, str);
+}
+
 #endif
 
 const char *get_hello_world() {
