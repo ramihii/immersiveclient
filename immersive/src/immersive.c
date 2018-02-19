@@ -4,8 +4,6 @@
 #include <jni.h>
 #endif
 
-#include <zabar.h>
-
 #include <stdio.h>
 
 #ifdef __cplusplus

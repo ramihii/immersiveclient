@@ -1,3 +1,7 @@
 /build
 /build-armeabi
+/build-armeabi-v7a
+/build-armeabi-v8a
+/build-i686
+/build-x86_64
 /build-native
