@@ -19,3 +19,14 @@
 
 # ctags
 tags
+
+# deps
+/prefix
+/aprefix
+/deps
+
+# output
+/build
+
+# old autotools files, switched to CMake
+/.autotools-backup.tar.gz
