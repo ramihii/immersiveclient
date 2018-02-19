@@ -36,28 +36,27 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         try {
             mCamera.setPreviewDisplay(surfaceHolder);
             mCamera.startPreview();
-        } catch (IOException e){
-            Log.d("ERROR", "Camera error on surfaceCreated method " + e.getMessage());
+        } catch(IOException e) {
+            Log.d("ERROR", "Camera error on surfaceCreated" + e.getMessage());
         }
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3){
-        if(mHolder.getSurface() == null){
+        if(mHolder.getSurface() == null)
             return;
-        }
 
         try {
             mCamera.stopPreview();
-        } catch (Exception e){
+        } catch(Exception e) {
 
         }
 
         try {
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();
-        } catch (IOException e){
-            Log.d("ERROR", "Camera error on surfaceChanged " + e.getMessage());
+        } catch(IOException e) {
+            Log.d("ERROR", "Camera error on surfaceChanged" + e.getMessage());
         }
     }
 
