@@ -17,7 +17,10 @@ configure_file(
 
 set(CMAKE_LIBRARY_PATH "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib")
 
-include_directories("${IMMERSIVE_ROOT}/build/${TGT_ABI}/include")
+link_directories("~/Android/Sdk/ndk-bundle/platforms/android-27/arch-arm/usr/lib")
+
+include_directories("${IMMERSIVE_ROOT}/build/${TGT_ABI}/include" "~/Android/Sdk/ndk-bundle/sysroot/usr/include")
+
 
 #include_directories("${PROJECT_BINARY_DIR}")
 

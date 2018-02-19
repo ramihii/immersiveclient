@@ -2,6 +2,7 @@
 
 #ifdef FOR_ANDROID
 #include <jni.h>
+#include <android/log.h>
 #endif
 
 #include <stdio.h>
@@ -11,6 +12,14 @@ extern "C" {
 #endif
 
 #ifdef FOR_ANDROID
+
+#define  LOG_TAG    "someTag"
+
+#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+#define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,LOG_TAG,__VA_ARGS__)
+#define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+
 JNIEXPORT jint JNICALL
 Java_net_immersive_immersiveclient_Hello_addInts(JNIEnv *env, jobject obj, jint a, jint b) {
 	return a + b;
@@ -22,7 +31,7 @@ Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss){
 
 JNIEXPORT void JNICALL
 Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass clss){
-	printf("%s","Testi!\n");
+	LOGD("%s","Testi!\n");
 }
 #endif
 

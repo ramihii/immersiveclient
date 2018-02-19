@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
             FrameLayout camera_view = (FrameLayout)findViewById(R.id.camera_view);
             camera_view.addView(mCameraView);
         }
-        
+
 
         helloGL = new HelloGL(this);
         FrameLayout hello_view = (FrameLayout) findViewById(R.id.hellogl);
