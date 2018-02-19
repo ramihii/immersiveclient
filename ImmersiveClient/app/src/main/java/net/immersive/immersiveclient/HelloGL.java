@@ -50,7 +50,7 @@ public class HelloGL extends GLSurfaceView {
 
         @Override
         public void onDrawFrame(GL10 gl10) {
-
+            Immersive.cppDraw();
         }
 
         @Override

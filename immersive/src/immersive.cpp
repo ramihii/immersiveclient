@@ -16,16 +16,13 @@ Java_net_immersive_immersiveclient_Hello_addInts(JNIEnv *env, jobject obj, jint 
 	return a + b;
 }
 
-JNIEXPORT jint JNICALL
-Java_net_immersive_immersiveclient_Hello_mulInts(JNIEnv *env, jobject obj, jint a, jint b) {
-	return a * b;
+JNIEXPORT void JNICALL
+Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss){
 }
 
-JNIEXPORT jstring JNICALL Java_net_immersive_immersiveclient_Hello_helloStr(JNIEnv *env, jobject obj) {
-	const char *str = "Hello, world_imm\n";
-	return env->NewStringUTF(str);
+JNIEXPORT void JNICALL
+Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass clss){
 }
-
 #endif
 
 const char *get_hello_world() {
