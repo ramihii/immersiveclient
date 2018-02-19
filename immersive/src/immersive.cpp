@@ -22,8 +22,8 @@ Java_net_immersive_immersiveclient_Hello_mulInts(JNIEnv *env, jobject obj, jint 
 }
 
 JNIEXPORT jstring JNICALL Java_net_immersive_immersiveclient_Hello_helloStr(JNIEnv *env, jobject obj) {
-	char *str = "Hello, world_imm\n";
-	return (*env)->NewStringUTF(env, str);
+	const char *str = "Hello, world_imm\n";
+	return env->NewStringUTF(str);
 }
 
 #endif
