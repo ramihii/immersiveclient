@@ -14,6 +14,10 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class HelloGL extends GLSurfaceView {
 
+    static {
+        System.loadLibrary("immersive");
+    }
+
     private HelloGL.Renderer mRenderer;
 
     public HelloGL(Context context) {

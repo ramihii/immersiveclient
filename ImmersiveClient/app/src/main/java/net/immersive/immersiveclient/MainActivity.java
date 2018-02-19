@@ -12,6 +12,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Camera mCamera = null;
     private CameraView mCameraView = null;
+    private HelloGL helloGL = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +30,11 @@ public class MainActivity extends AppCompatActivity {
             FrameLayout camera_view = (FrameLayout)findViewById(R.id.camera_view);
             camera_view.addView(mCameraView);
         }
+        
+
+        helloGL = new HelloGL(this);
+        FrameLayout hello_view = (FrameLayout) findViewById(R.id.hellogl);
+        hello_view.addView(helloGL);
 
         ImageButton imgClose = (ImageButton)findViewById(R.id.imgClose);
         imgClose.setOnClickListener(new View.OnClickListener() {

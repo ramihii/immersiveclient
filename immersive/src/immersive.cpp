@@ -22,6 +22,7 @@ Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss){
 
 JNIEXPORT void JNICALL
 Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass clss){
+	printf("%s","Testi!\n");
 }
 #endif
 
