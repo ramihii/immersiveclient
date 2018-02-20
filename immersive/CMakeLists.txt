@@ -17,10 +17,10 @@ configure_file(
 
 set(CMAKE_LIBRARY_PATH "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib")
 
-link_directories("~/Android/Sdk/ndk-bundle/platforms/android-27/arch-arm/usr/lib")
+#link_directories("~/Android/Sdk/ndk-bundle/platforms/android-27/arch-arm/usr/lib")
 
-include_directories("${IMMERSIVE_ROOT}/build/${TGT_ABI}/include" "~/Android/Sdk/ndk-bundle/sysroot/usr/include")
-
+#include_directories("${IMMERSIVE_ROOT}/build/${TGT_ABI}/include" "~/Android/Sdk/ndk-bundle/sysroot/usr/include")
+include_directories("${IMMERSIVE_ROOT}/build/${TGT_ABI}/include")
 
 #include_directories("${PROJECT_BINARY_DIR}")
 
@@ -28,4 +28,6 @@ if(AS_EXECUTABLE)
     add_executable(immersive src/immersive.cpp)
 else(AS_EXECUTABLE)
     add_library(immersive SHARED src/immersive.cpp)
+    find_library(log-lib log)
+    target_link_libraries(immersive ${log-lib})
 endif(AS_EXECUTABLE)

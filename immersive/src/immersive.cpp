@@ -44,7 +44,29 @@ const char *get_hello_world() {
 #endif
 
 #ifdef AS_EXECUTABLE
+//#include <
 int main(int argc, char **argv) {
+	char glutGamemode[32];
+	char cparam_name[] = "Data/camera_para.dat";
+	char vconf[] = "";
+	char patt_name[]  = "Data/hiro.patt";
+
+	glutInit(&argc, argv);
+
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+	if (!windowed) {
+		if(windowRefresh)
+			sprintf(glutGamemode, "%ix%i:%i@%i", windowWidth, windowHeight, windowDepth, windowRefresh);
+		else
+			sprintf(glutGamemode, "%ix%i:%i", windowWidth, windowHeight, windowDepth);
+
+		glutGameModeString(glutGamemode);
+		glutEnterGameMode();
+	} else {
+		glutInitWindowSize(windowWidth, windowHeight);
+		glutCreateWindow(argv[0]);
+	}
+
 	printf("Hello, world2\n");
 	return 0;
 }

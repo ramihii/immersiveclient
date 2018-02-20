@@ -1,6 +1,10 @@
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_VERSION 1)
 
+set(CMAKE_SYSROOT $ENV{TOOLCHAIN_HOME}/$ENV{TOOLDIR_ARM}/sysroot)
+
+#set(CMAKE_SYSROOT /home/okka/code/crosscc/android/arm-api15/sysroot)
+
 #set(AS arm-linux-androideabi-as)
 #set(NM arm-linux-androideabi-nm)
 #set(AR arm-linux-androideabi-ar)
