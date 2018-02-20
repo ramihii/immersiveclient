@@ -33,3 +33,6 @@ tags
 
 # compiled README.md
 /README.html
+
+# generated and customized setenv.sh
+/setenv.sh
