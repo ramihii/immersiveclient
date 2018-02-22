@@ -20,13 +20,14 @@ public class HelloGL extends GLSurfaceView {
         System.loadLibrary("immersive");
     }
 
-    private HelloGL.Renderer mRenderer;
+
+    private static HelloGLRenderer mRenderer;
 
     public HelloGL(Context context) {
         super(context);
-        mRenderer = new HelloGL.Renderer(this);
+        mRenderer = new HelloGLRenderer();
         setEGLContextClientVersion(2);
-        setRenderer((Renderer)mRenderer);
+        setRenderer(mRenderer);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
@@ -41,6 +42,7 @@ public class HelloGL extends GLSurfaceView {
 
         @Override
         public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+
             mSTexture = new SurfaceTexture(-1);
             if(mSTexture == null) {
                 Log.e("HelloGL", "Creating SurfaceTexture failed");
@@ -63,5 +65,7 @@ public class HelloGL extends GLSurfaceView {
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
 
         }
+
+
     }
 }
