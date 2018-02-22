@@ -16,8 +16,13 @@ public class MainActivity extends AppCompatActivity {
     private CameraView mCameraView = null;
     private HelloGL helloGL = null;
 
+    static {
+        System.loadLibrary("immersive");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         Immersive immersive = new Immersive();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -34,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
             camera_view.addView(mCameraView);
         }
 
+        immersive.cppInit(this.getAssets(),this.getFilesDir().getAbsolutePath());
+
         helloGL = new HelloGL(this);
         FrameLayout hello_view = (FrameLayout) findViewById(R.id.hellogl);
         hello_view.addView(helloGL);
@@ -46,6 +53,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        immersive.cppInit(this.getAssets());
+
     }
 }

@@ -11,6 +11,7 @@
 #include <osg/Version>
 
 #include <string>
+#include <fstream>
 #endif
 
 #include <stdio.h>
@@ -29,6 +30,9 @@ extern "C" {
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
 static AAssetManager* asset_manager;
+static std::string storage_path;
+static bool initialized = false;
+const static int BUFFER_SIZE = 128;
 
 //JNIEXPORT jint JNICALL
 //Java_net_immersive_immersiveclient_Hello_addInts(JNIEnv *env, jobject obj, jint a, jint b) {
@@ -36,8 +40,12 @@ static AAssetManager* asset_manager;
 //}
 
 JNIEXPORT void JNICALL
-Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, jobject assetManager ){
+Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, jobject assetManager, jstring filePath){
+
 	asset_manager = AAssetManager_fromJava(env, assetManager);
+
+	storage_path = env->GetStringUTFChars(filePath, 0);
+	LOGD("The storage path of the program is %s",storage_path.c_str());
 
 	AAssetDir* assetDir = AAssetManager_openDir(asset_manager, "");
 	const char* filename;
@@ -45,8 +53,29 @@ Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, j
 	{
 	   LOGD("Asset directory contains %s",filename);
 	}
+	AAssetDir_close(assetDir);
+
+	//Temporarily saving assets to file so OSG can read them
+	
+	assetDir = AAssetManager_openDir(asset_manager, "");
+	const char * fileName = NULL;
+	while((fileName = AAssetDir_getNextFileName(assetDir)) != NULL)
+	{
+		std::ofstream ofs(fileName,std::ofstream::binary);
+		LOGD("Writing file: %s/%s", storage_path.c_str(), fileName);
+
+		AAsset* asset = AAssetManager_open(asset_manager, fileName, AASSET_MODE_STREAMING);
+		char buffer[BUFFER_SIZE];
+		while( AAsset_read(asset,buffer,BUFFER_SIZE) > 0 )
+		{
+			ofs << buffer;
+		}
+	}
+	
+
 
 	AAssetDir_close(assetDir);
+	initialized = true;
 }
 
 JNIEXPORT void JNICALL
@@ -56,14 +85,13 @@ Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass clss){
 	int osg_patch = OPENSCENEGRAPH_PATCH_VERSION;
 
 	const char *osg_ver = osgGetVersion();
-	LOGD("%s '%s' %d.%d.%d\n", "Testi!", osg_ver, osg_major, osg_minor, osg_patch);
+	LOGD("%s '%s' %d.%d.%d\n", "CppDraw was called, OSG: ", osg_ver, osg_major, osg_minor, osg_patch);
 
-
-//    osgViewer::Viewer viewer;
-//    osg::ref_ptr<osg::Node> model = osgDB::readNodeFile( filename );
-//    viewer.setSceneData( model.get() );
-//    
-//    viewer.run();
+	//const char * testFileName = "/data/user/0/net.immersive.immersiveclient/files/spiderman_tex_final.obj";
+    //osgViewer::Viewer viewer;
+    //osg::ref_ptr<osg::Node> model = osgDB::readNodeFile( testFileName );
+    //viewer.setSceneData( model.get() );
+    
 }
 #endif
 

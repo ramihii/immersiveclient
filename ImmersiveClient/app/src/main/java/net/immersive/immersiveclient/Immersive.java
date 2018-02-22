@@ -8,7 +8,7 @@ import android.content.res.AssetManager;
 
 public class Immersive {
 
-    public native void cppInit(AssetManager assetManager);
+    public native void cppInit(AssetManager assetManager, String filePath);
     public static native void cppDraw();
 
 }
