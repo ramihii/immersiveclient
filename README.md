@@ -13,6 +13,8 @@ https://developer.android.com/studio/index.html
 Install LLDB, CMake and NDK within Android studio
 from Tools > Android > SDK Manager > tab: SDK Tools
 
+Place OpenSourceGraph compiled binaries (include and lib files) in build/armeabi/
+
 Export a standalone android toolchain with the
 `make_standalone_toolchain` tool provided in the
 NDK. The tool can be found at
@@ -26,7 +28,8 @@ Make sure the `<exported toolchain>/bin` directory
 can be found on path before attempting to build for
 android.
 
-For example, if you want to place your toolchain in: $HOME/immersivetoolchain/arm-api15
+####Example of toolchain placement:
+If you want to place your toolchain in: $HOME/immersivetoolchain/arm-api15
 you should run:
 
 ```Bash
@@ -39,12 +42,19 @@ Now you can add this line to your $HOME/.bashrc:
 export PATH=$PATH:$HOME/immersivetoolchain/arm-api15/bin
 ```
 
-Then run
+####Setting build environment
+Run
+```Bash
+./gen-setenv.sh
+```
+This generates the setenv.sh file. Open the file and replace CHANGEME with the toolchain dir you specified earlier.
+
+Now you can try running (gives you instructions)
 ```Bash
 make copy-armeabi
 ```
 
-and you should be able to build the android studio project.
+When you have succesfully compiled the project through make, you can build and run it on Android Studio.
 
 ## LICENSE
 This software is licensed under the MIT License
