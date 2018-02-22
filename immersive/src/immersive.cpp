@@ -3,7 +3,14 @@
 #ifdef FOR_ANDROID
 #include <jni.h>
 #include <android/log.h>
+#include <android/asset_manager_jni.h>
+#include <android/asset_manager.h>
+
+#include <osgDB/ReadFile>
+#include <osgViewer/Viewer>
 #include <osg/Version>
+
+#include <string>
 #endif
 
 #include <stdio.h>
@@ -21,13 +28,25 @@ extern "C" {
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
-JNIEXPORT jint JNICALL
-Java_net_immersive_immersiveclient_Hello_addInts(JNIEnv *env, jobject obj, jint a, jint b) {
-	return a + b;
-}
+static AAssetManager* asset_manager;
+
+//JNIEXPORT jint JNICALL
+//Java_net_immersive_immersiveclient_Hello_addInts(JNIEnv *env, jobject obj, jint a, jint b) {
+//	return a + b;
+//}
 
 JNIEXPORT void JNICALL
-Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss){
+Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, jobject assetManager ){
+	asset_manager = AAssetManager_fromJava(env, assetManager);
+
+	AAssetDir* assetDir = AAssetManager_openDir(asset_manager, "");
+	const char* filename;
+	while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
+	{
+	   LOGD("Asset directory contains %s",filename);
+	}
+
+	AAssetDir_close(assetDir);
 }
 
 JNIEXPORT void JNICALL
@@ -37,8 +56,14 @@ Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass clss){
 	int osg_patch = OPENSCENEGRAPH_PATCH_VERSION;
 
 	const char *osg_ver = osgGetVersion();
-
 	LOGD("%s '%s' %d.%d.%d\n", "Testi!", osg_ver, osg_major, osg_minor, osg_patch);
+
+
+//    osgViewer::Viewer viewer;
+//    osg::ref_ptr<osg::Node> model = osgDB::readNodeFile( filename );
+//    viewer.setSceneData( model.get() );
+//    
+//    viewer.run();
 }
 #endif
 

@@ -1,5 +1,6 @@
 package net.immersive.immersiveclient;
 
+import android.content.res.AssetManager;
 import android.hardware.Camera;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,12 +11,14 @@ import android.widget.ImageButton;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Immersive immersive;
     private Camera mCamera = null;
     private CameraView mCameraView = null;
     private HelloGL helloGL = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Immersive immersive = new Immersive();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -31,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
             camera_view.addView(mCameraView);
         }
 
-
         helloGL = new HelloGL(this);
         FrameLayout hello_view = (FrameLayout) findViewById(R.id.hellogl);
         hello_view.addView(helloGL);
@@ -43,5 +45,7 @@ public class MainActivity extends AppCompatActivity {
                 System.exit(0);
             }
         });
+
+        immersive.cppInit(this.getAssets());
     }
 }

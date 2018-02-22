@@ -1,9 +1,11 @@
 package net.immersive.immersiveclient;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
+import android.content.res.AssetManager;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
