@@ -3,6 +3,7 @@
 #ifdef FOR_ANDROID
 #include <jni.h>
 #include <android/log.h>
+#include <osg/Version>
 #endif
 
 #include <stdio.h>
@@ -31,7 +32,13 @@ Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss){
 
 JNIEXPORT void JNICALL
 Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass clss){
-	LOGD("%s","Testi!\n");
+	int osg_major = OPENSCENEGRAPH_MAJOR_VERSION;
+	int osg_minor = OPENSCENEGRAPH_MINOR_VERSION;
+	int osg_patch = OPENSCENEGRAPH_PATCH_VERSION;
+
+	const char *osg_ver = osgGetVersion();
+
+	LOGD("%s '%s' %d.%d.%d\n", "Testi!", osg_ver, osg_major, osg_minor, osg_patch);
 }
 #endif
 
