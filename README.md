@@ -28,7 +28,7 @@ Make sure the `<exported toolchain>/bin` directory
 can be found on path before attempting to build for
 android.
 
-####Example of toolchain placement:
+##Example of toolchain placement:
 If you want to place your toolchain in: $HOME/immersivetoolchain/arm-api15
 you should run:
 
@@ -42,7 +42,7 @@ Now you can add this line to your $HOME/.bashrc:
 export PATH=$PATH:$HOME/immersivetoolchain/arm-api15/bin
 ```
 
-####Setting build environment
+##Setting build environment
 Run
 ```Bash
 ./gen-setenv.sh
