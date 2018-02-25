@@ -3,8 +3,16 @@
 #ifdef FOR_ANDROID
 #include <jni.h>
 #include <android/log.h>
+#include <android/asset_manager_jni.h>
+#include <android/asset_manager.h>
+
+#include <osgDB/ReadFile>
+#include <osgViewer/Viewer>
 #include <osg/Version>
 #include <zbar.h>
+
+#include <string>
+#include <fstream>
 #endif
 
 #include <stdio.h>
@@ -25,6 +33,16 @@ static unsigned char to_grayscale(unsigned char *ptr) {
 	return val > 255 ? 255 : val;
 }
 
+static AAssetManager* asset_manager;
+static std::string storage_path;
+static bool initialized = false;
+const static int BUFFER_SIZE = 128;
+
+//JNIEXPORT jint JNICALL
+//Java_net_immersive_immersiveclient_Hello_addInts(JNIEnv *env, jobject obj, jint a, jint b) {
+//	return a + b;
+//}
+
 #ifdef FOR_ANDROID
 
 #define LOG_TAG "ImmersiveLib"
@@ -35,12 +53,52 @@ static unsigned char to_grayscale(unsigned char *ptr) {
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
 JNIEXPORT void JNICALL
-Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss) {
+Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, jobject assetManager, jstring filePath){
+	asset_manager = AAssetManager_fromJava(env, assetManager);
+
+	storage_path = env->GetStringUTFChars(filePath, 0);
+	LOGD("The storage path of the program is %s",storage_path.c_str());
+
+	AAssetDir* assetDir = AAssetManager_openDir(asset_manager, "");
+	const char* filename;
+	while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
+	{
+	   LOGD("Asset directory contains %s",filename);
+	}
+	AAssetDir_close(assetDir);
+
+	//Temporarily saving assets to file so OSG can read them
+	
+	assetDir = AAssetManager_openDir(asset_manager, "");
+	const char * fileName = NULL;
+	while((fileName = AAssetDir_getNextFileName(assetDir)) != NULL)
+	{
+		std::ofstream ofs(fileName,std::ofstream::binary);
+		LOGD("Writing file: %s/%s", storage_path.c_str(), fileName);
+
+		AAsset* asset = AAssetManager_open(asset_manager, fileName, AASSET_MODE_STREAMING);
+		char buffer[BUFFER_SIZE];
+		while( AAsset_read(asset,buffer,BUFFER_SIZE) > 0 )
+		{
+			ofs << buffer;
+		}
+	}
+
+	AAssetDir_close(assetDir);
+	initialized = true;
 }
 
 // public static native void cppDraw(int bufferWidth, int bufferHeight, int format, int bytesPerPixel, ByteBuffer buffer);
 JNIEXPORT void JNICALL
 Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, jint buffer_width, jint buffer_height, jint buffer_format, jint bytes_per_pixel, jobject jbuffer) {
+	const char *osg_ver = osgGetVersion();
+	LOGD("CppDraw was called, OSG: %s\n", osg_ver);
+
+	//const char * testFileName = "/data/user/0/net.immersive.immersiveclient/files/spiderman_tex_final.obj";
+    //osgViewer::Viewer viewer;
+    //osg::ref_ptr<osg::Node> model = osgDB::readNodeFile( testFileName );
+    //viewer.setSceneData( model.get() );
+
 	/* jobject buffer is of Java type java/nio/ByteBuffer*/
 	unsigned char *buffer = (unsigned char *) env->GetDirectBufferAddress(jbuffer);
 
@@ -54,7 +112,7 @@ Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, ji
 			grey[y * buffer_width + x] = to_grayscale(buffer + y * buffer_width + x * bytes_per_pixel);
 		}
 	}
-
+    
 	unsigned int major, minor;
 	int ret = zbar_version(&major, &minor);
 	LOGD("zbar major: %u, minor: %u, ret: %d\n", major, minor, ret);
@@ -115,14 +173,6 @@ Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, ji
 
 	zbar_image_destroy(zimg);
 	zbar_image_scanner_destroy(zbar);
-
-	//int osg_major = OPENSCENEGRAPH_MAJOR_VERSION;
-	//int osg_minor = OPENSCENEGRAPH_MINOR_VERSION;
-	//int osg_patch = OPENSCENEGRAPH_PATCH_VERSION;
-
-	//const char *osg_ver = osgGetVersion();
-
-	//LOGD("%s '%s' %d.%d.%d\n", "Testi!", osg_ver, osg_major, osg_minor, osg_patch);
 }
 #endif
 
