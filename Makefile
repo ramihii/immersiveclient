@@ -15,8 +15,8 @@ javah:
 	mkdir -p /tmp/imm-javah
 	mkdir -p immersive/src/javah/
 	cp -r ImmersiveClient/app/src/main/java/net/ /tmp/imm-javah
-	cd /tmp/imm-javah; javac net/immersive/immersiveclient/Hello.java
-	cd /tmp/imm-javah; javah net.immersive.immersiveclient.Hello
+	cd /tmp/imm-javah; javac net/immersive/immersiveclient/Immersive.java
+	cd /tmp/imm-javah; javah net.immersive.immersiveclient.Immersive
 	cp /tmp/imm-javah/*.h immersive/src/javah
 	rm -r /tmp/imm-javah
 
@@ -80,3 +80,8 @@ x86_64: cmake-x86_64
 copy-x86_64: x86_64
 	mkdir -p ImmersiveClient/app/immersive-lib/bin/x86_64/
 	cp immersive/build-x86_64/libimmersive.so ImmersiveClient/app/immersive-lib/bin/x86_64/libimmersive.so
+
+clean:
+	rm -rf immersive/build-armeabi/
+	rm -rf immersive/build-i686/
+	rm -rf immersive/build-x86_64/

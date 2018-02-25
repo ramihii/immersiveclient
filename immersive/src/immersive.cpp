@@ -4,54 +4,133 @@
 #include <jni.h>
 #include <android/log.h>
 #include <osg/Version>
+#include <zbar.h>
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
+using namespace zbar;
 extern "C" {
 #endif
 
+static unsigned char to_grayscale(unsigned char *ptr) {
+	unsigned char red = 0.2989 * ptr[0];
+	unsigned char green = 0.5870 * ptr[1];
+	unsigned char blue = 0.1140 * ptr[2];
+
+	unsigned char val = red + green + blue;
+
+	return val > 255 ? 255 : val;
+}
+
 #ifdef FOR_ANDROID
 
-#define  LOG_TAG    "someTag"
+#define LOG_TAG "ImmersiveLib"
 
-#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
-#define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,LOG_TAG,__VA_ARGS__)
-#define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
-#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
-
-JNIEXPORT jint JNICALL
-Java_net_immersive_immersiveclient_Hello_addInts(JNIEnv *env, jobject obj, jint a, jint b) {
-	return a + b;
-}
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN,LOG_TAG,__VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
 JNIEXPORT void JNICALL
-Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss){
+Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss) {
 }
 
+// public static native void cppDraw(int bufferWidth, int bufferHeight, int format, int bytesPerPixel, ByteBuffer buffer);
 JNIEXPORT void JNICALL
-Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass clss){
-	int osg_major = OPENSCENEGRAPH_MAJOR_VERSION;
-	int osg_minor = OPENSCENEGRAPH_MINOR_VERSION;
-	int osg_patch = OPENSCENEGRAPH_PATCH_VERSION;
+Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, jint buffer_width, jint buffer_height, jint buffer_format, jint bytes_per_pixel, jobject jbuffer) {
+	/* jobject buffer is of Java type java/nio/ByteBuffer*/
+	unsigned char *buffer = (unsigned char *) env->GetDirectBufferAddress(jbuffer);
 
-	const char *osg_ver = osgGetVersion();
+	unsigned char *grey = (unsigned char *) malloc(sizeof(unsigned char) * buffer_width * buffer_height);
+	if(!grey)
+		return;
+	
+	int x, y;
+	for(y = 0; y < buffer_width; y++) {
+		for(x = 0; x < buffer_height; x++) {
+			grey[y * buffer_width + x] = to_grayscale(buffer + y * buffer_width + x * bytes_per_pixel);
+		}
+	}
 
-	LOGD("%s '%s' %d.%d.%d\n", "Testi!", osg_ver, osg_major, osg_minor, osg_patch);
+	unsigned int major, minor;
+	int ret = zbar_version(&major, &minor);
+	LOGD("zbar major: %u, minor: %u, ret: %d\n", major, minor, ret);
+
+	zbar_image_scanner_t *zbar = zbar_image_scanner_create();
+	if(!zbar) {
+		LOGE("failed to construct zbar\n");
+		free(grey);
+		return;
+	}
+
+	zbar_image_t *zimg = zbar_image_create();
+	if(!zimg) {
+		LOGE("failed to construct zbar image\n");
+		free(grey);
+		return;
+	}
+
+	zbar_image_set_format(zimg, 0x59455247);
+	zbar_image_set_size(zimg, buffer_width, buffer_height);
+	zbar_image_set_data(zimg, grey, buffer_width * buffer_height, NULL);
+
+	ret = zbar_scan_image(zbar, zimg);
+
+	const zbar_symbol_set_t *symbols = zbar_image_scanner_get_results(zbar);
+	if(!symbols) {
+		LOGE("failed to get symbols\n");
+		free(grey);
+		return;
+	}
+
+	const zbar_symbol_t *sym = zbar_symbol_set_first_symbol(symbols);
+	if(!sym) {
+		LOGE("No symbols found\n");
+		free(grey);
+		return;
+	}
+
+	while(sym) {
+		const char *data = zbar_symbol_get_data(sym);
+		if(!data) {
+			LOGW("failed to get data from symbol");
+		} else {
+			unsigned int npoints = zbar_symbol_get_loc_size(sym);
+			unsigned int i;
+
+			for(i = 0; i < npoints; i++) {
+				LOGD("  * point %d (x, y): (%3d, %3d)\n", i,
+						zbar_symbol_get_loc_x(sym, i),
+						zbar_symbol_get_loc_y(sym, i));
+			}
+			
+			LOGD("data within symbol: %s\n", data);
+		}
+		
+		sym = zbar_symbol_next(sym);
+	}
+
+	zbar_image_destroy(zimg);
+	zbar_image_scanner_destroy(zbar);
+
+	//int osg_major = OPENSCENEGRAPH_MAJOR_VERSION;
+	//int osg_minor = OPENSCENEGRAPH_MINOR_VERSION;
+	//int osg_patch = OPENSCENEGRAPH_PATCH_VERSION;
+
+	//const char *osg_ver = osgGetVersion();
+
+	//LOGD("%s '%s' %d.%d.%d\n", "Testi!", osg_ver, osg_major, osg_minor, osg_patch);
 }
 #endif
-
-const char *get_hello_world() {
-	return "Hello, world_imm\n";
-}
 
 #ifdef __cplusplus
 }
 #endif
 
 #ifdef AS_EXECUTABLE
-//#include <
 int main(int argc, char **argv) {
 	char glutGamemode[32];
 	char cparam_name[] = "Data/camera_para.dat";
