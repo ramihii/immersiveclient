@@ -15,27 +15,34 @@ configure_file(
 	"${IMMERSIVE_ROOT}/build/${TGT_ABI}/include/immersive_config.h"
 )
 
-set(CMAKE_LIBRARY_PATH "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib")
-
-#link_directories("~/Android/Sdk/ndk-bundle/platforms/android-27/arch-arm/usr/lib")
+set(CMAKE_LIBRARY_PATH "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib/")
 
 #include_directories("${IMMERSIVE_ROOT}/build/${TGT_ABI}/include" "~/Android/Sdk/ndk-bundle/sysroot/usr/include")
-include_directories("${IMMERSIVE_ROOT}/build/${TGT_ABI}/include")
+include_directories("${IMMERSIVE_ROOT}/build/${TGT_ABI}/include/")
 
 #include_directories("${PROJECT_BINARY_DIR}")
 
+#set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--whole-archive")
+
 if(AS_EXECUTABLE)
+    # TODO: fix
+    message("Building this project as executable is not supported currently")
     add_executable(immersive src/immersive.cpp)
 else(AS_EXECUTABLE)
     add_library(immersive SHARED src/immersive.cpp)
+
     find_library(log-lib log)
     find_library(android-lib android)
+
+    set(iconv-lib "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib/libiconv.a")
+    set(zbar-lib "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib/libzbar.a")
     set(osg-lib "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib/libosg.a")
     set(osg-viewer "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib/libosgViewer.a")
     set(osg-db "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib/libosgDB.a")
     #set(osg-util "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib/libosgUtil.a")
     #set(osg-threads"${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib/libOpenThreads.a")
 
-    target_link_libraries(immersive ${log-lib} ${osg-lib} ${android-lib} ${osg-viewer} ${osg-db})
+    #target_link_libraries(immersive ${log-lib} ${osg-lib} ${iconv-lib} ${zbar-lib})
     #target_link_libraries(immersive ${log-lib} ${osg-lib} ${android-lib} ${osg-viewer} ${osg-db} ${osg-util} ${osg-threads})
+    target_link_libraries(immersive ${log-lib} ${android-lib} "-Wl,--whole-archive" ${osg-lib} ${osg-viewer} ${osg-db} ${iconv-lib} ${zbar-lib} "-Wl,--no-whole-archive")
 endif(AS_EXECUTABLE)
