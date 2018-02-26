@@ -103,8 +103,10 @@ Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, ji
 	unsigned char *buffer = (unsigned char *) env->GetDirectBufferAddress(jbuffer);
 
 	unsigned char *grey = (unsigned char *) malloc(sizeof(unsigned char) * buffer_width * buffer_height);
-	if(!grey)
+	if(!grey) {
+		LOGE("failed to malloc()\n");
 		return;
+	}
 	
 	int x, y;
 	for(y = 0; y < buffer_width; y++) {
