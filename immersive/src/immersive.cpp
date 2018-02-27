@@ -143,7 +143,7 @@ Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, ji
 	int x, y;
 	for(y = 0; y < buffer_width; y++) {
 		for(x = 0; x < buffer_height; x++) {
-			grey[y * buffer_width + x] = to_grayscale(buffer + y * buffer_width + x * bytes_per_pixel);
+			grey[y * buffer_width + x] = to_grayscale(buffer + y * buffer_width * bytes_per_pixel + x * bytes_per_pixel);
 		}
 	}
     
