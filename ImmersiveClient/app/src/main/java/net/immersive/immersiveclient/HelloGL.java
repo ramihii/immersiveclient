@@ -20,14 +20,23 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class HelloGL extends GLSurfaceView {
 
-    private static HelloGLRenderer mRenderer;
 
-    public HelloGL(Context context) {
+    private static Context assetContext;
+    private HelloGL.Renderer mRenderer;
+    private static Immersive immersive;
+
+    public HelloGL(Context context, Immersive immersive) {
         super(context);
-        mRenderer = new HelloGLRenderer();
+        assetContext = context;
+        this.immersive = immersive;
+        mRenderer = new HelloGL.Renderer(this);
         setEGLContextClientVersion(2);
-        setRenderer(mRenderer);
+        setRenderer((Renderer)mRenderer);
+
+        //Set to RENDERMODE_CONTINUOUSLY to call native code continuously
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        System.out.println("Rendermode: " + this.getRenderMode());
+
     }
 
     public static class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
@@ -69,6 +78,7 @@ public class HelloGL extends GLSurfaceView {
             }
 
             pixelBuffer.flip();
+
         }
 
         @Override
@@ -79,7 +89,7 @@ public class HelloGL extends GLSurfaceView {
                 Log.e("HelloGL", "Creating SurfaceTexture failed");
                 return;
             }
-
+            immersive.cppInit(assetContext.getAssets(),assetContext.getFilesDir().getAbsolutePath());
             mSTexture.setOnFrameAvailableListener(this);
         }
 
@@ -95,7 +105,6 @@ public class HelloGL extends GLSurfaceView {
 
         @Override
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-
         }
     }
 }

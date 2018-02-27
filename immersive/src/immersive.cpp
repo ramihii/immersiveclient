@@ -54,6 +54,8 @@ const static int BUFFER_SIZE = 128;
 
 JNIEXPORT void JNICALL
 Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, jobject assetManager, jstring filePath){
+	if(!initialized){
+
 	asset_manager = AAssetManager_fromJava(env, assetManager);
 
 	storage_path = env->GetStringUTFChars(filePath, 0);
@@ -73,8 +75,9 @@ Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, j
 	const char * fileName = NULL;
 	while((fileName = AAssetDir_getNextFileName(assetDir)) != NULL)
 	{
-		std::ofstream ofs(fileName,std::ofstream::binary);
-		LOGD("Writing file: %s/%s", storage_path.c_str(), fileName);
+		std::string outputPath = storage_path + "/" + fileName;
+		std::ofstream ofs(outputPath.c_str(),std::ofstream::binary);
+		LOGD("Writing file: %s", outputPath.c_str());
 
 		AAsset* asset = AAssetManager_open(asset_manager, fileName, AASSET_MODE_STREAMING);
 		char buffer[BUFFER_SIZE];
@@ -85,7 +88,14 @@ Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, j
 	}
 
 	AAssetDir_close(assetDir);
+
+	LOGD("Native initialized");
 	initialized = true;
+	}//end initialization block
+	else 
+	{
+	LOGD("Already initialized!");
+	}
 }
 
 // public static native void cppDraw(int bufferWidth, int bufferHeight, int format, int bytesPerPixel, ByteBuffer buffer);
@@ -93,12 +103,34 @@ JNIEXPORT void JNICALL
 Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, jint buffer_width, jint buffer_height, jint buffer_format, jint bytes_per_pixel, jobject jbuffer) {
 	const char *osg_ver = osgGetVersion();
 	LOGD("CppDraw was called, OSG: %s\n", osg_ver);
+	//LOGD("Filepath: %s", osg::getFilePath());
 
-	//const char * testFileName = "/data/user/0/net.immersive.immersiveclient/files/spiderman_tex_final.obj";
-    //osgViewer::Viewer viewer;
-    //osg::ref_ptr<osg::Node> model = osgDB::readNodeFile( testFileName );
-    //viewer.setSceneData( model.get() );
+	
+	const char * testFileName = "/data/user/0/net.immersive.immersiveclient/files/spiderman_tex_final.obj";
 
+	std::ifstream ifs(testFileName);
+	std::string str;
+	while(ifs >> str){
+		//LOGD("File contains: %s",str.c_str());
+	}
+
+    osgViewer::Viewer viewer;
+    osg::ref_ptr<osg::Node> model = osgDB::readRefNodeFile( testFileName );
+	if(NULL != model){
+		LOGD("OSG SUCCESFULLY LOADED MODEL %s",testFileName);
+	} else {
+		LOGD("OSG FAILED TO LOAD MODEL %s",testFileName);
+	}
+    viewer.setSceneData( model.get() );
+
+    viewer.setUpViewerAsEmbeddedInWindow(300, 300, 300, 300);
+    viewer.setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
+
+	//viewer.realize();
+
+	//viewer.run();
+
+	//viewer.frame();
 	/* jobject buffer is of Java type java/nio/ByteBuffer*/
 	unsigned char *buffer = (unsigned char *) env->GetDirectBufferAddress(jbuffer);
 

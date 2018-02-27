@@ -39,9 +39,9 @@ public class MainActivity extends AppCompatActivity {
             camera_view.addView(mCameraView);
         }
 
-        immersive.cppInit(this.getAssets(),this.getFilesDir().getAbsolutePath());
 
-        helloGL = new HelloGL(this);
+
+        helloGL = new HelloGL(this, immersive);
         FrameLayout hello_view = (FrameLayout) findViewById(R.id.hellogl);
         hello_view.addView(helloGL);
 
