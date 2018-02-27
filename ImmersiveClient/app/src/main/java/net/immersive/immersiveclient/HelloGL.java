@@ -34,7 +34,7 @@ public class HelloGL extends GLSurfaceView {
         setRenderer((Renderer)mRenderer);
 
         //Set to RENDERMODE_CONTINUOUSLY to call native code continuously
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         System.out.println("Rendermode: " + this.getRenderMode());
 
     }

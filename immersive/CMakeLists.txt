@@ -30,6 +30,7 @@ if(AS_EXECUTABLE)
     add_executable(immersive src/immersive.cpp)
 else(AS_EXECUTABLE)
     add_library(immersive SHARED src/immersive.cpp)
+    add_library(immersive-osg-a-notifier src/osgAndroidNotifier.cpp)
 
     find_library(log-lib log)
     find_library(android-lib android)
@@ -44,7 +45,10 @@ else(AS_EXECUTABLE)
     set(osg-ga "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib/libosgGA.a")
     set(openthreads "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib/libOpenThreads.a")
 
+    #osg plugins
+    set(osg-plugin-obj "${IMMERSIVE_ROOT}/build/${TGT_ABI}/lib/osgPlugins-3.5.10/libosgdb_obj.a")
+
     #target_link_libraries(immersive ${log-lib} ${osg-lib} ${iconv-lib} ${zbar-lib})
     #target_link_libraries(immersive ${log-lib} ${osg-lib} ${android-lib} ${osg-viewer} ${osg-db} ${osg-util} ${osg-threads})
-    target_link_libraries(immersive ${log-lib} ${android-lib} "-Wl,--whole-archive" ${openthreads} ${osg-util} ${osg-text} ${osg-lib} ${osg-ga} ${osg-viewer} ${osg-db} ${iconv-lib} ${zbar-lib} "-Wl,--no-whole-archive")
+    target_link_libraries(immersive immersive-osg-a-notifier ${log-lib} ${android-lib} "-Wl,--whole-archive" ${openthreads} ${osg-util} ${osg-text} ${osg-lib} ${osg-ga} ${osg-viewer} ${osg-db} ${iconv-lib} ${zbar-lib} ${osg-plugin-obj} "-Wl,--no-whole-archive")
 endif(AS_EXECUTABLE)

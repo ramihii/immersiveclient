@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         if(mCamera != null) {
             mCameraView = new CameraView(this, mCamera);
             FrameLayout camera_view = (FrameLayout)findViewById(R.id.camera_view);
-            camera_view.addView(mCameraView);
+            //camera_view.addView(mCameraView);
         }
 
 

@@ -7,6 +7,7 @@
 #include <android/asset_manager.h>
 
 #include <osgDB/ReadFile>
+#include <osgDB/FileUtils>
 #include <osgViewer/Viewer>
 #include <osg/Version>
 #include <zbar.h>
@@ -38,6 +39,9 @@ static std::string storage_path;
 static bool initialized = false;
 const static int BUFFER_SIZE = 128;
 
+#include "osgAndroidNotifier.h" //Handles logging osg notifications
+static immersive::OsgAndroidNotifier* _osgAndroidNotifier;
+
 //JNIEXPORT jint JNICALL
 //Java_net_immersive_immersiveclient_Hello_addInts(JNIEnv *env, jobject obj, jint a, jint b) {
 //	return a + b;
@@ -56,22 +60,26 @@ JNIEXPORT void JNICALL
 Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, jobject assetManager, jstring filePath){
 	if(!initialized){
 
+	_osgAndroidNotifier = new immersive::OsgAndroidNotifier();
+    _osgAndroidNotifier->setTag("OSG NOTIFIER");
+    osg::setNotifyHandler(_osgAndroidNotifier);
+
 	asset_manager = AAssetManager_fromJava(env, assetManager);
 
 	storage_path = env->GetStringUTFChars(filePath, 0);
 	LOGD("The storage path of the program is %s",storage_path.c_str());
 
 	AAssetDir* assetDir = AAssetManager_openDir(asset_manager, "");
-	const char* filename;
-	while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
-	{
-	   LOGD("Asset directory contains %s",filename);
-	}
-	AAssetDir_close(assetDir);
+	//const char* filename;
+	//while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
+	//{
+	//   LOGD("Asset directory contains %s",filename);
+	//}
+	//AAssetDir_close(assetDir);
 
 	//Temporarily saving assets to file so OSG can read them
 	
-	assetDir = AAssetManager_openDir(asset_manager, "");
+	//assetDir = AAssetManager_openDir(asset_manager, "");
 	const char * fileName = NULL;
 	while((fileName = AAssetDir_getNextFileName(assetDir)) != NULL)
 	{
@@ -103,11 +111,11 @@ JNIEXPORT void JNICALL
 Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, jint buffer_width, jint buffer_height, jint buffer_format, jint bytes_per_pixel, jobject jbuffer) {
 	const char *osg_ver = osgGetVersion();
 	LOGD("CppDraw was called, OSG: %s\n", osg_ver);
-	//LOGD("Filepath: %s", osg::getFilePath());
-
 	
-	const char * testFileName = "/data/user/0/net.immersive.immersiveclient/files/spiderman_tex_final.obj";
+	const char * testFileName = "/data/user/0/net.immersive.immersiveclient/files/cat.obj";
 
+	osgDB::setCurrentWorkingDirectory("/data/user/0/net.immersive.immersiveclient/files/");
+	LOGD("Current working dir %s",osgDB::getCurrentWorkingDirectory);
 	std::ifstream ifs(testFileName);
 	std::string str;
 	while(ifs >> str){
@@ -126,11 +134,12 @@ Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, ji
     viewer.setUpViewerAsEmbeddedInWindow(300, 300, 300, 300);
     viewer.setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 
-	//viewer.realize();
+	viewer.realize();
 
 	//viewer.run();
 
-	//viewer.frame();
+	viewer.frame();
+	
 	/* jobject buffer is of Java type java/nio/ByteBuffer*/
 	unsigned char *buffer = (unsigned char *) env->GetDirectBufferAddress(jbuffer);
 
