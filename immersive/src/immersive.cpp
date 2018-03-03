@@ -1,6 +1,7 @@
 #include <immersive_config.h>
 
 #define GLES2TEST
+//#define DO_ZBAR
 
 #ifdef FOR_ANDROID
 #include <jni.h>
@@ -10,8 +11,14 @@
 
 #include <osgDB/ReadFile>
 #include <osgDB/FileUtils>
-#include <osgViewer/Viewer>
+
 #include <osg/Version>
+#include <osgViewer/Viewer>
+#include <osgViewer/Renderer>
+#include <osgViewer/ViewerEventHandlers>
+#include <osg/GL>
+#include <osg/GLExtensions>
+
 #include <zbar.h>
 
 #include <string>
@@ -28,6 +35,7 @@ using namespace zbar;
 extern "C" {
 #endif
 
+#ifdef DO_ZBAR
 static unsigned char to_grayscale(unsigned char *ptr) {
 	unsigned char red = 0.2989 * ptr[0];
 	unsigned char green = 0.5870 * ptr[1];
@@ -37,6 +45,7 @@ static unsigned char to_grayscale(unsigned char *ptr) {
 
 	return val > 255 ? 255 : val;
 }
+#endif
 
 static AAssetManager* asset_manager;
 static std::string storage_path;
@@ -46,10 +55,7 @@ const static int BUFFER_SIZE = 128;
 #include "osgAndroidNotifier.h" //Handles logging osg notifications
 static immersive::OsgAndroidNotifier* _osgAndroidNotifier;
 
-//JNIEXPORT jint JNICALL
-//Java_net_immersive_immersiveclient_Hello_addInts(JNIEnv *env, jobject obj, jint a, jint b) {
-//	return a + b;
-//}
+static osgViewer::Viewer _viewer;
 
 #ifdef FOR_ANDROID
 
@@ -70,6 +76,8 @@ JNIEXPORT void JNICALL
 Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, jobject assetManager, jstring filePath){
 
 	if(!initialized){
+		LOGD("Initializing native");
+
 #ifdef GLES2TEST
 		if(gles2t_init(&gletest, log_func))
 			LOGD("GLES2 Init successful");
@@ -81,49 +89,74 @@ Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, j
 		return;
 #endif
 
-	_osgAndroidNotifier = new immersive::OsgAndroidNotifier();
-    _osgAndroidNotifier->setTag("OSG NOTIFIER");
-    osg::setNotifyHandler(_osgAndroidNotifier);
+		const char *osg_ver = osgGetVersion();
+		LOGD("OSG version: %s\n", osg_ver);
 
-	asset_manager = AAssetManager_fromJava(env, assetManager);
+		_osgAndroidNotifier = new immersive::OsgAndroidNotifier();
+		_osgAndroidNotifier->setTag("OSG NOTIFIER");
+		osg::setNotifyHandler(_osgAndroidNotifier);
 
-	storage_path = env->GetStringUTFChars(filePath, 0);
-	LOGD("The storage path of the program is %s",storage_path.c_str());
+		asset_manager = AAssetManager_fromJava(env, assetManager);
 
-	AAssetDir* assetDir = AAssetManager_openDir(asset_manager, "");
-	//const char* filename;
-	//while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
-	//{
-	//   LOGD("Asset directory contains %s",filename);
-	//}
-	//AAssetDir_close(assetDir);
+		storage_path = env->GetStringUTFChars(filePath, 0);
+		LOGD("The storage path of the program is %s",storage_path.c_str());
 
-	//Temporarily saving assets to file so OSG can read them
-	
-	//assetDir = AAssetManager_openDir(asset_manager, "");
-	const char * fileName = NULL;
-	while((fileName = AAssetDir_getNextFileName(assetDir)) != NULL)
-	{
-		std::string outputPath = storage_path + "/" + fileName;
-		std::ofstream ofs(outputPath.c_str(),std::ofstream::binary);
-		LOGD("Writing file: %s", outputPath.c_str());
+		AAssetDir* assetDir = AAssetManager_openDir(asset_manager, "");
+		//const char* filename;
+		//while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
+		//{
+		//   LOGD("Asset directory contains %s",filename);
+		//}
+		//AAssetDir_close(assetDir);
 
-		AAsset* asset = AAssetManager_open(asset_manager, fileName, AASSET_MODE_STREAMING);
-		char buffer[BUFFER_SIZE];
-		while( AAsset_read(asset,buffer,BUFFER_SIZE) > 0 )
+		//Temporarily saving assets to file so OSG can read them
+		
+		//assetDir = AAssetManager_openDir(asset_manager, "");
+		const char * fileName = NULL;
+		while((fileName = AAssetDir_getNextFileName(assetDir)) != NULL)
 		{
-			ofs << buffer;
+			std::string outputPath = storage_path + "/" + fileName;
+			std::ofstream ofs(outputPath.c_str(),std::ofstream::binary);
+			LOGD("Writing file: %s", outputPath.c_str());
+
+			AAsset* asset = AAssetManager_open(asset_manager, fileName, AASSET_MODE_STREAMING);
+			char buffer[BUFFER_SIZE];
+			while( AAsset_read(asset,buffer,BUFFER_SIZE) > 0 )
+			{
+				ofs << buffer;
+			}
 		}
-	}
 
-	AAssetDir_close(assetDir);
+		AAssetDir_close(assetDir);
 
-	LOGD("Native initialized");
-	initialized = true;
+		const char * testFileName = "/data/user/0/net.immersive.immersiveclient/files/cat.obj";
+
+		//osgDB::setCurrentWorkingDirectory("/data/user/0/net.immersive.immersiveclient/files/");
+
+		osg::ref_ptr<osg::Node> model = osgDB::readRefNodeFile( testFileName );
+		if(NULL != model){
+			LOGD("OSG SUCCESFULLY LOADED MODEL %s",testFileName);
+		} else {
+			LOGD("OSG FAILED TO LOAD MODEL %s",testFileName);
+		}
+		_viewer.setSceneData( model.get() );
+
+		_viewer.setUpViewerAsEmbeddedInWindow(0, 0, 1000, 1000);
+		_viewer.setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
+
+		_viewer.realize();
+
+		_viewer.addEventHandler(new osgViewer::StatsHandler);
+		_viewer.addEventHandler(new osgViewer::ThreadingHandler);
+		_viewer.addEventHandler(new osgViewer::LODScaleHandler);
+		//_viewer.run();
+		
+		LOGD("Native initialized");
+		initialized = true;
 	}//end initialization block
 	else 
 	{
-	LOGD("Already initialized!");
+		LOGD("Already initialized!");
 	}
 }
 
@@ -142,37 +175,9 @@ Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, ji
 	return;
 #endif
 
-	const char *osg_ver = osgGetVersion();
-	LOGD("CppDraw was called, OSG: %s\n", osg_ver);
-	
-	const char * testFileName = "/data/user/0/net.immersive.immersiveclient/files/cat.obj";
+	_viewer.frame();
 
-	osgDB::setCurrentWorkingDirectory("/data/user/0/net.immersive.immersiveclient/files/");
-	LOGD("Current working dir %s",osgDB::getCurrentWorkingDirectory);
-	std::ifstream ifs(testFileName);
-	std::string str;
-	while(ifs >> str){
-		//LOGD("File contains: %s",str.c_str());
-	}
-
-    osgViewer::Viewer viewer;
-    osg::ref_ptr<osg::Node> model = osgDB::readRefNodeFile( testFileName );
-	if(NULL != model){
-		LOGD("OSG SUCCESFULLY LOADED MODEL %s",testFileName);
-	} else {
-		LOGD("OSG FAILED TO LOAD MODEL %s",testFileName);
-	}
-    viewer.setSceneData( model.get() );
-
-    viewer.setUpViewerAsEmbeddedInWindow(300, 300, 300, 300);
-    viewer.setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
-
-	viewer.realize();
-
-	//viewer.run();
-
-	viewer.frame();
-	
+#ifdef DO_ZBAR
 	/* jobject buffer is of Java type java/nio/ByteBuffer*/
 	unsigned char *buffer = (unsigned char *) env->GetDirectBufferAddress(jbuffer);
 
@@ -249,6 +254,7 @@ Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, ji
 
 	zbar_image_destroy(zimg);
 	zbar_image_scanner_destroy(zbar);
+#endif
 }
 #endif
 
