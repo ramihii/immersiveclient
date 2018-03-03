@@ -1,5 +1,7 @@
 #include <immersive_config.h>
 
+#define GLES2TEST
+
 #ifdef FOR_ANDROID
 #include <jni.h>
 #include <android/log.h>
@@ -14,6 +16,8 @@
 
 #include <string>
 #include <fstream>
+
+#include "gles2test.h"
 #endif
 
 #include <stdio.h>
@@ -56,9 +60,26 @@ static immersive::OsgAndroidNotifier* _osgAndroidNotifier;
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
+static void log_func(const char *msg) {
+	LOGD("%s", msg);
+}
+
+static gles2t gletest;
+
 JNIEXPORT void JNICALL
 Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, jobject assetManager, jstring filePath){
+
 	if(!initialized){
+#ifdef GLES2TEST
+		if(gles2t_init(&gletest, log_func))
+			LOGD("GLES2 Init successful");
+		else
+			LOGD("GLES2 Init failed");
+
+		initialized = true;
+
+		return;
+#endif
 
 	_osgAndroidNotifier = new immersive::OsgAndroidNotifier();
     _osgAndroidNotifier->setTag("OSG NOTIFIER");
@@ -109,6 +130,18 @@ Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, j
 // public static native void cppDraw(int bufferWidth, int bufferHeight, int format, int bytesPerPixel, ByteBuffer buffer);
 JNIEXPORT void JNICALL
 Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, jint buffer_width, jint buffer_height, jint buffer_format, jint bytes_per_pixel, jobject jbuffer) {
+	if(!initialized)
+		return;
+
+#ifdef GLES2TEST
+	if(gles2t_draw(&gletest, log_func))
+		LOGD("GLES2 draw successful");
+	else
+		LOGD("GLES2 draw failed");
+
+	return;
+#endif
+
 	const char *osg_ver = osgGetVersion();
 	LOGD("CppDraw was called, OSG: %s\n", osg_ver);
 	

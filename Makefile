@@ -28,6 +28,13 @@ native:
 run: native
 	./immersive/build-native/immersive
 
+android: copy-armeabi
+	cd ImmersiveClient; ./gradlew installDebug
+	adb shell am start -n net.immersive.immersiveclient/net.immersive.immersiveclient.MainActivity
+	@echo 'Press Enter to stop the application'
+	@read
+	adb shell am force-stop net.immersive.immersiveclient
+
 crossenv-check:
 ifeq (,${TOOLCHAIN_HOME})
 	@echo 'TOOLCHAIN_HOME not set; please source setenv.sh'
