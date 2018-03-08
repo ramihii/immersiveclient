@@ -73,13 +73,13 @@ static void log_func(const char *msg) {
 static gles2t gletest;
 
 JNIEXPORT void JNICALL
-Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, jobject assetManager, jstring filePath){
+Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, jobject assetManager, jstring filePath, jint bufferWidth, jint bufferHeight){
 
 	if(!initialized){
 		LOGD("Initializing native");
 
 #ifdef GLES2TEST
-		if(gles2t_init(&gletest, log_func))
+		if(gles2t_init(&gletest, bufferWidth, bufferHeight, log_func))
 			LOGD("GLES2 Init successful");
 		else
 			LOGD("GLES2 Init failed");
@@ -162,25 +162,30 @@ Java_net_immersive_immersiveclient_Immersive_cppInit(JNIEnv *env, jclass clss, j
 
 // public static native void cppDraw(int bufferWidth, int bufferHeight, int format, int bytesPerPixel, ByteBuffer buffer);
 JNIEXPORT void JNICALL
-Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, jint buffer_width, jint buffer_height, jint buffer_format, jint bytes_per_pixel, jobject jbuffer) {
+Java_net_immersive_immersiveclient_Immersive_cppDraw(JNIEnv *env, jclass cls, jint buffer_width, jint buffer_height, jint buffer_format, jint bytes_per_pixel, jbyteArray jframe) {
 	if(!initialized)
 		return;
 
+#if defined(GLES2TEST) || defined(DO_ZBAR)
+	/* jobject buffer is of Java type java/nio/ByteBuffer*/
+	unsigned char *buffer = (unsigned char *) env->GetByteArrayElements(jframe, NULL);
+	//unsigned char *buffer = (unsigned char *) env->GetDirectBufferAddress(jbuffer);
+#endif
+
 #ifdef GLES2TEST
-	if(gles2t_draw(&gletest, log_func))
+	if(gles2t_draw(&gletest, buffer, buffer_width, buffer_height, buffer_format, bytes_per_pixel, log_func))
 		LOGD("GLES2 draw successful");
 	else
 		LOGD("GLES2 draw failed");
 
+	env->ReleaseByteArrayElements(jframe, (jbyte *)buffer, JNI_ABORT);
 	return;
 #endif
 
 	_viewer.frame();
 
 #ifdef DO_ZBAR
-	/* jobject buffer is of Java type java/nio/ByteBuffer*/
-	unsigned char *buffer = (unsigned char *) env->GetDirectBufferAddress(jbuffer);
-
+#error todo nv21 to rgb in immersive.cpp
 	unsigned char *grey = (unsigned char *) malloc(sizeof(unsigned char) * buffer_width * buffer_height);
 	if(!grey) {
 		LOGE("failed to malloc()\n");

@@ -13,7 +13,7 @@ public class Immersive {
 
 	/** NOTE: this method is NOT safe to use with multiple instances of this class.
 	 *  Underlying native code assumes only one instance of this class exists.*/
-    public native void cppInit(AssetManager assetManager, String filePath);
+    public native void cppInit(AssetManager assetManager, String filePath, int bufferWidth, int bufferHeight);
 
-    public static native void cppDraw(int bufferWidth, int bufferHeight, int format, int bytesPerPixel, ByteBuffer buffer);
+    public static native void cppDraw(int bufferWidth, int bufferHeight, int format, int bytesPerPixel, byte[] buffer);
 }

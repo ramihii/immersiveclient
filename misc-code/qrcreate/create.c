@@ -43,6 +43,8 @@ int main(int argc, char **argv) {
 	const char *text = hello;
 	if(argc == 2)
 		text = argv[1];
+	else
+		printf("WARN: using default string '%s'\n", text);
 
 	printf("to encode: %s\n", text);
 

@@ -27,6 +27,7 @@ tags
 
 # output
 /build
+/build-armeabi.tar.gz
 
 # old autotools files, switched to CMake
 /.autotools-backup.tar.gz

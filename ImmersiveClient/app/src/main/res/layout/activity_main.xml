@@ -7,8 +7,6 @@
     tools:context="net.immersive.immersiveclient.MainActivity">
 
     <FrameLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MainActivity">
@@ -18,30 +16,29 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        </FrameLayout>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context=".MainActivity">
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/imgClose"
-            android:layout_gravity="right|top"
-            android:background="@android:drawable/ic_menu_close_clear_cancel"
-            android:padding="20dp"/>
-    </FrameLayout>
+                <FrameLayout
+                    android:id="@+id/hellogl"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-    <FrameLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".MainActivity">
+                </FrameLayout>
+            </FrameLayout>
 
-        <FrameLayout
-            android:id="@+id/hellogl"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            <ImageButton
+                android:id="@+id/imgClose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|top"
+                android:background="@android:drawable/ic_menu_close_clear_cancel"
+                android:padding="20dp" />
 
         </FrameLayout>
+
     </FrameLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -20,31 +20,44 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class HelloGL extends GLSurfaceView {
 
-
     private static Context assetContext;
     private HelloGL.Renderer mRenderer;
     private static Immersive immersive;
 
     public HelloGL(Context context, Immersive immersive) {
         super(context);
+
         assetContext = context;
         this.immersive = immersive;
         mRenderer = new HelloGL.Renderer(this);
+
         setEGLContextClientVersion(2);
         setRenderer((Renderer)mRenderer);
 
-        //Set to RENDERMODE_CONTINUOUSLY to call native code continuously
-        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-        System.out.println("Rendermode: " + this.getRenderMode());
+        // Set to RENDERMODE_CONTINUOUSLY to call native code continuously
+        //setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
+        // RENDERMODE_WHEN_DIRTY because it gets called from camera preview
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        System.out.println("Rendermode: " + this.getRenderMode());
+    }
+
+    public void initBuffer(int captureWidth, int captureHeight, int bytesPerPixel) {
+        mRenderer.initBuffer(captureWidth, captureHeight, bytesPerPixel);
+    }
+
+    public void receiveFrame(byte[] data) {
+        mRenderer.onCameraFrame(data);
     }
 
     public static class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
 
-        private ByteBuffer pixelBuffer;
-        private int bufferWidth;
-        private int bufferHeight;
+        private byte[] frameBuffer;
+        private int bufferWidth = 0;
+        private int bufferHeight = 0;
         private int bytesPerPixel;
+
+        private int phase = 0;
 
         private GLSurfaceView view;
         private SurfaceTexture mSTexture;
@@ -54,6 +67,7 @@ public class HelloGL extends GLSurfaceView {
 
             bytesPerPixel = 3;
 
+            /*
             Bitmap bm = BitmapFactory.decodeResource(view.getResources(), R.raw.test);
 
             int width = bufferWidth = bm.getWidth();
@@ -78,29 +92,53 @@ public class HelloGL extends GLSurfaceView {
             }
 
             pixelBuffer.flip();
+            */
+        }
 
+        public void initBuffer(int width, int height, int bytesPerPixel) {
+            this.bufferWidth = width;
+            this.bufferHeight = height;
+            this.bytesPerPixel = bytesPerPixel;
+
+            phase |= 1;
+        }
+
+        public void onCameraFrame(byte[] data) {
+            this.frameBuffer = data;
         }
 
         @Override
         public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-
             mSTexture = new SurfaceTexture(-1);
             if(mSTexture == null) {
                 Log.e("HelloGL", "Creating SurfaceTexture failed");
                 return;
             }
-            immersive.cppInit(assetContext.getAssets(),assetContext.getFilesDir().getAbsolutePath());
+
             mSTexture.setOnFrameAvailableListener(this);
+
+            phase |= 2;
         }
 
         @Override
         public void onSurfaceChanged(GL10 gl10, int i, int i1) {
-
         }
 
         @Override
         public void onDrawFrame(GL10 gl10) {
-            Immersive.cppDraw(bufferWidth, bufferHeight, Immersive.PIX_FMT_RGB, bytesPerPixel, pixelBuffer);
+            if((phase & 4) == 0) {
+                if (phase != 3)
+                    return;
+
+                if(bufferWidth == 0 || bufferHeight == 0)
+                    throw new IllegalStateException("Buffer width or height zero, would result in segfault in native code (" + bufferWidth + ", " + bufferHeight + ")");
+
+                immersive.cppInit(assetContext.getAssets(), assetContext.getFilesDir().getAbsolutePath(), bufferWidth, bufferHeight);
+                phase |= 4;
+            }
+
+            if(frameBuffer != null)
+                Immersive.cppDraw(bufferWidth, bufferHeight, Immersive.PIX_FMT_RGB, bytesPerPixel, frameBuffer);
         }
 
         @Override
