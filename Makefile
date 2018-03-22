@@ -22,7 +22,7 @@ javah:
 
 native:
 	mkdir -p immersive/build-native
-	cd immersive/build-native; cmake -DAS_EXECUTABLE=ON -DIMMERSIVE_ROOT=$(PWD) -DTGT_ABI=native ..
+	cd immersive/build-native; cmake -DAS_EXECUTABLE=ON -DIMMERSIVE_ROOT=$(PWD) -DTGT_ABI=native -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
 	make -C immersive/build-native
 
 run: native
@@ -92,3 +92,4 @@ clean:
 	rm -rf immersive/build-armeabi/
 	rm -rf immersive/build-i686/
 	rm -rf immersive/build-x86_64/
+	rm -rf immersive/build-native/
