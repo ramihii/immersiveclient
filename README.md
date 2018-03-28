@@ -2,6 +2,32 @@
 
 ## Setup
 
+Clone this repository:
+
+```Bash
+git clone https://github.com/ramihii/immersiveclient
+```
+
+Pull the files:
+
+```Bash
+git pull
+```
+
+### Native 
+
+To build and run the application:
+```
+make run
+```
+
+To run and build:
+```
+make native
+```
+
+### Android
+
 Download ARToolKit5-bin-5.3.2-Android.zip from:
 
 https://artoolkit.org/download-artoolkit-sdk
