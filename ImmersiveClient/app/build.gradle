@@ -10,27 +10,37 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
-            abiFilters 'armeabi'
+            //abiFilters 'armeabi'
         }
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_ABI=armeabi"
-                cppFlags "-frtti -fexceptions"
+                //arguments "-DANDROID_ABI=armeabi"
+                //cppFlags "-frtti -fexceptions"
             }
         }
     }
     sourceSets {
         main {
-            jniLibs.srcDirs 'immersive-lib/bin'
-            assets.srcDirs = ['src/main/assets', 'src/main/assets/']
+            //jniLibs.srcDirs 'immersive-lib/bin'
+            //assets.srcDirs = ['src/main/assets', 'src/main/assets/']
         }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            ndk {
+                // x86 and x86_64 don't work atm because of ARuco
+                abiFilters 'armeabi', 'armeabi-v7a'
+            }
+        }
+        debug {
+            ndk {
+                abiFilters 'armeabi', 'armeabi-v7a'
+            }
         }
     }
+
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
@@ -45,4 +55,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    implementation project(':OpenCV')
 }

@@ -5,51 +5,53 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
-# Creates and names a library, sets it as either STATIC
-# or SHARED, and provides the relative paths to its source code.
-# You can define multiple libraries, and CMake builds them for you.
-# Gradle automatically packages shared libraries with your APK.
+project(aruco_java LANGUAGES CXX)
 
-#add_library( # Sets the name of the library.
-#             native-lib
-#
-#             # Sets the library as a shared library.
-#             SHARED
-#
-#             # Provides a relative path to your source file(s).
-#             src/main/cpp/native-lib.cpp )
+# TODO move this to Gradle (should actually be in a machine specific config
+set(OpenCV_DIR C:/01-libs/OpenCV-android-sdk/sdk/native/jni)
 
-add_library(
-             immersive
+set(CMAKE_CXX_STANDARD 11) # C++11...
+set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
+set(CMAKE_CXX_EXTENSIONS ON) #...with compiler extensions like gnu++11
+
+# Check that the OpenCV Java library exists
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libopencv_java3.so)
+    message(FATAL "OpenCV Java lib doesn't exist for ARCH=${ANDROID_ABI}")
+endif()
+
+add_library( aruco_java SHARED
+    src/main/cpp/aruco_java.cpp
+    src/main/cpp/aruco_java.h
+        )
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/main/include)
+
+find_package(OpenCV)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+# ARuco c++ lib
+add_library( aruco
              SHARED
              IMPORTED )
-
 set_target_properties(
-             immersive
-             PROPERTIES IMPORTED_LOCATION
-             immersive-lib/bin/${ANDROID_ABI}/libimmersive.so
-)
+        aruco
 
-# Searches for a specified prebuilt library and stores the path as a
-# variable. Because CMake includes system libraries in the search path by
-# default, you only need to specify the name of the public NDK library
-# you want to add. CMake verifies that the library exists before
-# completing its build.
+       # Specifies the parameter you want to define.
+       PROPERTIES IMPORTED_LOCATION
 
-find_library( # Sets the name of the path variable.
-              log-lib
+       # Provides the path to the library you want to import.
+       ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libaruco.so
+       )
 
-              # Specifies the name of the NDK library that
-              # you want CMake to locate.
+set( ARUCO_LIB aruco )
+
+find_library( log-lib
               log )
 
-# Specifies libraries CMake should link to your target library. You
-# can link multiple libraries, such as libraries you define in this
-# build script, prebuilt third-party libraries, or system libraries.
+target_link_libraries( # Specifies the target library.
+                       aruco_java
+                       ${ARUCO_LIB}
 
-#target_link_libraries( # Specifies the target library.
-#                       native-lib
-#
-#                       # Links the target library to the log library
-#                       # included in the NDK.
-#                       ${log-lib} )
+                       # Links the target library to the log library
+                       # included in the NDK.
+                       ${log-lib} )

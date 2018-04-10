@@ -7,3 +7,6 @@
 /build
 /captures
 .externalNativeBuild
+
+# External OpenCV module
+OpenCV

@@ -2,6 +2,7 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:opencv="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="net.immersive.immersiveclient.MainActivity">
@@ -11,33 +12,20 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-        <FrameLayout
+        <org.opencv.android.JavaCameraView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:visibility="visible"
             android:id="@+id/camera_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            opencv:show_fps="true"  opencv:camera_id="front" />
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context=".MainActivity">
-
-                <FrameLayout
-                    android:id="@+id/hellogl"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                </FrameLayout>
-            </FrameLayout>
-
-            <ImageButton
-                android:id="@+id/imgClose"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right|top"
-                android:background="@android:drawable/ic_menu_close_clear_cancel"
-                android:padding="20dp" />
-
-        </FrameLayout>
+        <ImageButton
+            android:id="@+id/imgClose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|top"
+            android:background="@android:drawable/ic_menu_close_clear_cancel"
+            android:padding="20dp" />
 
     </FrameLayout>
 

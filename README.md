@@ -1,5 +1,24 @@
 # Immersive mobile AR - project
 
+## New stuff
+Usable with Android Studio (dunno about command line)
+open {git_root}/ImmersiveClient with Studio
+
+- Download OpenCV-sdk-Android
+https://opencv.org/releases.html
+Android pack
+
+- Import OpenCV as new module
+    - New -> Import Module (select path)
+    - (OpenCV-Android-sdk/sdk folder)
+- Name it :OpenCV
+
+- Modify External Build Files -> CMakeLists.txt
+OpenCV_DIR to where you unzipped OpenCV Android sdk (jni folder)
+
+- Unpack precompiled aruco ?link? to ImmersiveClient/app/src/main
+https://drive.google.com/file/d/1mUW-zhY3ap60bOrBGNPOoaP5TaPdRAk0/view?usp=sharing
+
 ## Setup
 
 Clone this repository:
@@ -14,7 +33,7 @@ Pull the files:
 git pull
 ```
 
-### Native 
+### Native
 
 To build and run the application:
 ```
